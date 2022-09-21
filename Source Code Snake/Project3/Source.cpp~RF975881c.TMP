@@ -1,0 +1,282 @@
+﻿#include<iostream>
+#include<time.h>
+#include"console.h"
+#include<conio.h>
+using namespace std;
+#define MAX_SIZE_FOOD 4
+#define LENGTH_SNAKE 6
+#define MAX_SPEED 40
+#define MAX_SIZE_SNAKE 10
+
+#define LEVEL1 150
+
+
+
+enum  STATUS { UP, DOWN, LEFT, RIGHT };
+
+struct Position {
+	int x, y;
+	int ox, oy;
+	STATUS status;
+	int lenght;
+	int speed;
+	bool Die = false;
+};
+Position Food[4];
+Position Gate[3][2];
+int numEat = 0;
+void Snake_Init(Position Snake[]) //Khoi tao ran
+{
+	//Snake[0] la dau cua con ran
+	Snake[0].x = 3;
+	Snake[1].x = 2;
+	Snake[2].x = 1;
+	Snake[3].x = 0;
+
+	Snake[0].y = 0;
+	Snake[1].y = 0;
+	Snake[2].y = 0;
+	Snake[3].y = 0;
+
+	Snake[0].status = RIGHT; //Trang thai ban dau cua ran di chuyen ve phai
+	Snake->lenght = LENGTH_SNAKE;
+	Snake->speed = LEVEL1;
+	//Sleep(1);
+}
+
+
+bool checkPointFoodAndGate(Position Snake[], int x, int y) //Kiem tra xem thuc an, cong có cham than ran
+{
+	for (int i = 0; i < Snake->lenght; i++)
+	{
+		if (Snake[i].x == x && Snake[i].y == y)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void CreateGate(Position Snake[])
+{
+	do{
+		Gate[1][0].x = 35;
+		Gate[1][0].y = 57;
+	} while (checkPointFoodAndGate(Snake, Gate[1][0].x, Gate[1][0].y) == false);
+	
+
+}
+void DrawGate(Position Snake[])
+{
+	 //x x
+	//xxx
+	CreateGate(Snake);
+	//In ra x x
+	Gate[0][0].x = Gate[1][0].x-1;
+	Gate[0][0].y = Gate[1][0].y + 1;
+	gotoXY(Gate[0][0].x, Gate[0][0].y);
+	cout << "x";
+	Gate[2][0].x = Gate[1][0].x+ 1;
+	Gate[2][0].y = Gate[1][0].y + 1;
+	gotoXY(Gate[2][0].x, Gate[2][0].y);
+	cout << "x";
+	/*gotoXY(Gate[1][0].x, Gate[1][0].y);
+	cout << "o";*/
+	//In ra xxx
+	Gate[0][1].x = Gate[0][0].x;
+	Gate[0][1].y = Gate[0][0].y - 1;
+	gotoXY(Gate[0][1].x, Gate[0][1].y);
+	cout << "x";
+	Gate[1][1].x = Gate[1][0].x;
+	Gate[1][1].y = Gate[1][0].y -1;
+	gotoXY(Gate[1][1].x, Gate[1][1].y);
+	cout << "x";
+	Gate[2][1].x = Gate[2][0].x;
+	Gate[2][1].y = Gate[2][0].y - 1;
+	gotoXY(Gate[2][1].x, Gate[2][1].y);
+	cout << "x";
+}
+bool SnakeInGate(Position Snake[])
+{
+	if (Snake[0].x == Gate[1][0].x && Snake[0].y == Gate[1][0].y)
+		return true;
+	return false;
+}
+void SnakeOutGate(Position Snake[])
+{
+	Sleep(500);
+	DrawGate(Snake);
+	//Snake[0] la dau cua con ran
+	Snake[0].x = Gate[1][0].x;
+	//Snake[1].x = 2;
+	//Snake[2].x = 1;
+	//Snake[3].x = 0;
+
+	Snake[0].y = Gate[1][0].y;
+	//Snake[1].y = 0;
+	//Snake[2].y = 0;
+	//Snake[3].y = 0;
+
+	Snake[0].status = DOWN;
+
+}
+void CreateFood(Position Snake[]) // Ham tao ra do an
+{
+	srand(time(NULL));
+	for (int i = 0; i < 4; i++)
+	{
+		do {
+			Food[i].x = (rand() % 56) + 1;
+			Food[i].y = (rand() % 75) + 1;
+		} while (checkPointFoodAndGate(Snake, Food[i].x, Food[i].y) == false);
+	}
+}
+void DrawFood(Position Snake[]) // Ve thuc an
+{
+	gotoXY(Food->x, Food->y);
+	cout << "X";
+}
+bool checkSnakeEatFood(Position Snake[]) // Kiem ta dau ran co an thuc an ko
+{
+	if (Snake[0].x == Food->x && Snake[0].y == Food->y)
+	{
+		return true;
+	}
+	return false;
+}
+void Eat(Position Snake[]) // Xu lý ran an thuc an
+{
+	//Tang do dai
+		Snake[Snake->lenght].x = Snake[Snake->lenght - 1].ox; 
+		Snake[Snake->lenght].y = Snake[Snake->lenght - 1].oy;
+		Snake->lenght += 1;
+		
+}
+void Move(Position Snake[])
+{
+	
+	switch (Snake[0].status)
+	{
+	case(RIGHT):
+		Snake[0].x++; break;
+	case(LEFT):
+		Snake[0].x--; break;
+	case(UP):
+		Snake[0].y--; break;
+	case(DOWN):
+		Snake[0].y++; break;
+	}
+
+	for (int i = 1; i < Snake->lenght; i++) //Ham xu ly khi ran cham than
+	{
+		if (Snake[0].x == Snake[i].x && Snake[0].y == Snake[i].y)
+		{
+			Snake->Die = true;
+			break;
+		}
+	}
+		if (SnakeInGate(Snake) == true)
+		{
+			/*gotoXY(Snake[Snake->lenght - 1].x, Snake[Snake->lenght - 1].y);
+			cout << " "; */
+					/*gotoXY(Snake[Snake->lenght - 1].x, Snake[Snake->lenght - 1].y);
+					cout << " ";*/
+			/*for (int i = 0; i < Snake->lenght; i++)
+			{
+				Snake[i].x = Snake[Snake->lenght - 1].x;
+				Snake[i].y = Snake[Snake->lenght - 1].y;
+			}*/
+			Snake[Snake->lenght].x = Snake[Snake->lenght - 1].x;
+			Snake[Snake->lenght].y = Snake[Snake->lenght - 1].y;
+			Snake->speed -= 50;			
+		}
+
+		if (checkSnakeEatFood(Snake) == true) // Ham xu ly khi ran an thuc an
+		{
+			
+			Eat(Snake); // Ran an thuc an
+			numEat += 1; //So luong thuc an da an
+			if (numEat < 2)
+			{
+				CreateFood(Snake); //tao thuc an moi
+				DrawFood(Snake); //In ra thuc an	
+			}
+		}
+	
+}
+
+void Control(Position Snake[])
+{
+	if (_kbhit())
+	{
+		int key = _getch();
+
+		if (key == 'W' || key == 'w' && Snake->status != DOWN)
+			Snake->status = UP;
+		else if (key == 'S' || key == 's'&&Snake->status != UP)
+			Snake->status = DOWN;
+		else if (key == 'A' || key == 'a'&&Snake->status != RIGHT)
+			Snake->status = LEFT;
+		else if (key == 'D' || key == 'd'&&Snake->status != LEFT)
+			Snake->status = RIGHT;
+	}
+}
+
+void Process(Position Snake[]) //Ham xu ly hinh anh con ran khi di chuyen
+{
+	for (int i = 0; i < Snake->lenght; i++)
+	{
+		if (i == 0)
+		{
+			Snake[i].ox = Snake[i].x;
+			Snake[i].oy = Snake[i].y;
+		}
+		else
+		{
+			Snake[i].ox = Snake[i].x;
+			Snake[i].oy = Snake[i].y;
+
+			Snake[i].x = Snake[i - 1].ox;
+			Snake[i].y = Snake[i - 1].oy;
+		}
+	}
+	Control(Snake);
+}
+
+void Show_Snake(Position Snake[])
+{
+	gotoXY(Snake[Snake->lenght - 1].ox, Snake[Snake->lenght - 1].oy);
+	cout << " "; //nè bà, tui dùng để xử lý giữ nguyên độ dài á
+	for (int i = 0; i < Snake->lenght; i++)
+	{
+		gotoXY(Snake[i].x, Snake[i].y);
+		cout << 1;
+	}
+	Process(Snake);
+	if (numEat == 2)
+	{
+		DrawGate(Snake);
+	}
+	Move(Snake);
+}
+
+void DrawGame(Position Snake[])
+{
+	CreateFood(Snake);//Tao ra thuc an dau tien
+	DrawFood(Snake); //In ra thuc an dau tien
+		while (!Snake->Die) //Neu ran chet thi dung vong lap
+		{
+			Show_Snake(Snake);
+			Sleep(Snake->speed);
+
+		}
+}
+int main()
+{
+	Position Snake[MAX_SIZE_SNAKE];
+	Snake_Init(Snake);
+	
+	DrawGame(Snake);
+	system("pause");
+	return 0;
+}
